@@ -159,6 +159,8 @@ def main_worker(gpu, ngpus_per_node, args):
         dis_net = torch.nn.DataParallel(dis_net).cuda()
     print(dis_net) if args.rank == 0 else 0
         
+    # dis_net.to('mps')
+    # gen_net.to('mps')
 
     # set optimizer
     if args.optimizer == "adam":
@@ -209,7 +211,7 @@ def main_worker(gpu, ngpus_per_node, args):
         args.max_epoch = np.ceil(args.max_iter * args.n_critic / len(train_loader))
 
     # initial
-    fixed_z = torch.cuda.FloatTensor(np.random.normal(0, 1, (100, args.latent_dim)))
+    fixed_z = torch.FloatTensor(np.random.normal(0, 1, (100, args.latent_dim)))
     avg_gen_net = deepcopy(gen_net).cpu()
     gen_avg_param = copy_params(avg_gen_net)
     del avg_gen_net
@@ -317,14 +319,14 @@ def main_worker(gpu, ngpus_per_node, args):
         load_params(avg_gen_net, gen_avg_param, args)
 #         if not args.multiprocessing_distributed or (args.multiprocessing_distributed
 #                 and args.rank == 0):
-# Add module in model saving code exp'gen_net.module.state_dict()' to solve the model loading unpaired name problem
+# Add module in model saving code exp'gen_netstate_dict()' to solve the model loading unpaired name problem
         save_checkpoint({
             'epoch': epoch + 1,
             'gen_model': args.gen_model,
             'dis_model': args.dis_model,
-            'gen_state_dict': gen_net.module.state_dict(),
-            'dis_state_dict': dis_net.module.state_dict(),
-            'avg_gen_state_dict': avg_gen_net.module.state_dict(),
+            'gen_state_dict': gen_net.state_dict(),
+            'dis_state_dict': dis_net.state_dict(),
+            'avg_gen_state_dict': avg_gen_net.state_dict(),
             'gen_optimizer': gen_optimizer.state_dict(),
             'dis_optimizer': dis_optimizer.state_dict(),
             'best_fid': best_fid,

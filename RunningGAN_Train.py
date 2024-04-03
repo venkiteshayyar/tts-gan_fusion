@@ -12,7 +12,8 @@ def parse_args():
     return opt
 args = parse_args()
 
-os.system(f"CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python train_GAN.py \
+#os.system(f"CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python train_GAN.py \
+os.system(f"python train_GAN.py \
 -gen_bs 16 \
 -dis_bs 16 \
 --dist-url 'tcp://localhost:4321' \
