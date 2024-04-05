@@ -364,7 +364,7 @@ def train(args, gen_net: nn.Module, dis_net: nn.Module, gen_optimizer, dis_optim
 #             scale_factor = args.img_size // int(sample_imgs.size(3))
 #             sample_imgs = torch.nn.functional.interpolate(sample_imgs, scale_factor=2)
 #             img_grid = make_grid(sample_imgs, nrow=4, normalize=True, scale_each=True)
-#             save_image(sample_imgs, f'sampled_images_{args.exp_name}.jpg', nrow=4, normalize=True, scale_each=True)
+            # save_image(sample_imgs, f'sampled_images_{args.exp_name}.jpg', nrow=4, normalize=True, scale_each=True)
             # writer.add_image(f'sampled_images_{args.exp_name}', img_grid, global_steps)
             tqdm.write(
                 "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f] [ema: %f] " %
@@ -476,7 +476,7 @@ def validate(args, fixed_z, fid_stat, epoch, gen_net: nn.Module, writer_dict, cl
     return mean, fid_score
 
 
-def save_samples(args, fixed_z, fid_stat, epoch, gen_net: nn.Module, writer_dict, clean_dir=True):
+def save_samples(args, fixed_z, epoch, gen_net: nn.Module, writer_dict, clean_dir=True):
 
     # eval mode
     gen_net.eval()
@@ -485,7 +485,8 @@ def save_samples(args, fixed_z, fid_stat, epoch, gen_net: nn.Module, writer_dict
         batch_size = fixed_z.size(0)
         sample_imgs = []
         for i in range(fixed_z.size(0)):
-            sample_img = gen_net(fixed_z[i:(i+1)], epoch)
+            #sample_img = gen_net(fixed_z[i:(i+1)], epoch)
+            sample_img = gen_net(fixed_z[i:(i+1)])
             sample_imgs.append(sample_img)
         sample_imgs = torch.cat(sample_imgs, dim=0)
         os.makedirs(f"./samples/{args.exp_name}", exist_ok=True)
@@ -559,7 +560,8 @@ def load_params(model, new_param, args, mode="gpu"):
         for p, new_p in zip(model.parameters(), new_param):
             cpu_p = deepcopy(new_p)
 #             p.data.copy_(cpu_p.cuda().to(f"cuda:{args.gpu}"))
-            p.data.copy_(cpu_p.cuda().to("cpu"))
+#            p.data.copy_(cpu_p.cuda().to("cpu"))
+            p.data.copy_(cpu_p.to("cpu"))
             del cpu_p
     
     else:
