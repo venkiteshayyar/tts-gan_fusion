@@ -74,7 +74,7 @@ def train_d(args, gen_net: nn.Module, dis_net: nn.Module, dis_optimizer, train_l
     dis_net.train()
     
     dis_optimizer.zero_grad()
-    
+
     for iter_idx, (imgs, _) in enumerate(tqdm(train_loader)):
         global_steps = writer_dict['train_global_steps']
         
@@ -207,7 +207,7 @@ def train(args, gen_net: nn.Module, dis_net: nn.Module, gen_optimizer, dis_optim
     # train mode
     gen_net.train()
     dis_net.train()
-    
+
     dis_optimizer.zero_grad()
     gen_optimizer.zero_grad()
     for iter_idx, (imgs, _) in enumerate(tqdm(train_loader)):

@@ -18,12 +18,12 @@ class Synthetic_Dataset(Dataset):
         
         #Generate Running Data
         running_gen_net = Generator(seq_len=150, channels=3, latent_dim=100)
-        running_ckp = torch.load(Running_model_path)
+        running_ckp = torch.load(Running_model_path, map_location=torch.device('cpu'))
         running_gen_net.load_state_dict(running_ckp['gen_state_dict'])
         
         #Generate Jumping Data
         jumping_gen_net = Generator(seq_len=150, channels=3, latent_dim=100)
-        jumping_ckp = torch.load(Jumping_model_path)
+        jumping_ckp = torch.load(Jumping_model_path, map_location=torch.device('cpu'))
         jumping_gen_net.load_state_dict(jumping_ckp['gen_state_dict'])
         
         

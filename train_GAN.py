@@ -41,7 +41,7 @@ def main():
 #     _init_inception()
 #     inception_path = check_or_download_inception(None)
 #     create_inception_graph(inception_path)
-    
+
     if args.seed is not None:
         torch.manual_seed(args.random_seed)
         torch.cuda.manual_seed(args.random_seed)
@@ -70,11 +70,11 @@ def main():
         mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
     else:
         # Simply call main_worker function
-        main_worker(args.gpu, ngpus_per_node, args)
+       main_worker(args.gpu, ngpus_per_node, args)
         
 def main_worker(gpu, ngpus_per_node, args):
     args.gpu = gpu
-    
+     
     if args.gpu is not None:
         print("Use GPU: {} for training".format(args.gpu))
 
@@ -210,6 +210,7 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.max_iter:
         args.max_epoch = np.ceil(args.max_iter * args.n_critic / len(train_loader))
 
+    args.max_epoch=2
     # initial
     fixed_z = torch.FloatTensor(np.random.normal(0, 1, (100, args.latent_dim)))
     avg_gen_net = deepcopy(gen_net).cpu()
