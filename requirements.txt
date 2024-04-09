@@ -1,0 +1,19 @@
+scipy
+numpy
+# netCDF4
+matplotlib
+jupyter
+h5py
+# pytorch
+torchvision
+seaborn
+scikit-learn
+tabulate
+tsaug
+einops
+imageio
+torchsummary
+tqdm
+cv2
+opencv-python
+tensorboard

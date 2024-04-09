@@ -21,6 +21,8 @@ import cv2
 from utils.torch_fid_score import get_fid
 # from utils.inception_score import get_inception_scorepython exps/dist1_new_church256.py --node 0022 --rank 0sample
 
+torch.multiprocessing.set_sharing_strategy('file_system')
+
 logger = logging.getLogger(__name__)
 
 def cur_stages(iter, args):
@@ -489,8 +491,13 @@ def save_samples(args, fixed_z, epoch, gen_net: nn.Module, writer_dict, clean_di
             sample_img = gen_net(fixed_z[i:(i+1)])
             sample_imgs.append(sample_img)
         sample_imgs = torch.cat(sample_imgs, dim=0)
-        os.makedirs(f"./samples/{args.exp_name}", exist_ok=True)
-        save_image(sample_imgs, f'./samples/{args.exp_name}/sampled_images_{epoch}.png', nrow=10, normalize=True, scale_each=True)
+
+        # ## Save to numpy format
+        fname=args.path_helper['sample_path']+'/gen_arr_epoch-{0}.npy'.format(epoch)
+        np.save(fname,sample_imgs.detach().numpy())
+
+        # os.makedirs(f"./samples/{args.exp_name}", exist_ok=True)
+        # save_image(sample_imgs, f'./samples/{args.exp_name}/sampled_images_{epoch}.png', nrow=10, normalize=True, scale_each=True)
     return 0
 
 

@@ -34,6 +34,7 @@ from torchvision.transforms import ToTensor
 # torch.backends.cudnn.enabled = True
 # torch.backends.cudnn.benchmark = True
 
+torch.multiprocessing.set_sharing_strategy('file_system')
 
 def main():
     args = cfg.parse_args()
@@ -200,17 +201,39 @@ def main_worker(gpu, ngpus_per_node, args):
 #     train_loader = data.DataLoader(train_set, batch_size=args.dis_batch_size, num_workers=args.num_workers, shuffle=True)
 #     test_loader = data.DataLoader(test_set, batch_size=args.dis_batch_size, num_workers=args.num_workers, shuffle=True)
     
-    train_set = unimib_load_dataset(incl_xyz_accel = True, incl_rms_accel = False, incl_val_group = False, is_normalize = True, one_hot_encode = False, data_mode = 'Train', single_class = True, class_name = args.class_name, augment_times=args.augment_times)
-    train_loader = data.DataLoader(train_set, batch_size=args.batch_size, num_workers=args.num_workers, shuffle = True)
-    test_set = unimib_load_dataset(incl_xyz_accel = True, incl_rms_accel = False, incl_val_group = False, is_normalize = True, one_hot_encode = False, data_mode = 'Test', single_class = True, class_name = args.class_name)
-    test_loader = data.DataLoader(test_set, batch_size=args.batch_size, num_workers=args.num_workers, shuffle = True)
+    # train_set = unimib_load_dataset(incl_xyz_accel = True, incl_rms_accel = False, incl_val_group = False, is_normalize = True, one_hot_encode = False, data_mode = 'Train', single_class = True, class_name = args.class_name, augment_times=args.augment_times)
+    # train_loader = data.DataLoader(train_set, batch_size=args.batch_size, num_workers=args.num_workers, shuffle = True)
+    # test_set = unimib_load_dataset(incl_xyz_accel = True, incl_rms_accel = False, incl_val_group = False, is_normalize = True, one_hot_encode = False, data_mode = 'Test', single_class = True, class_name = args.class_name)
+    # test_loader = data.DataLoader(test_set, batch_size=args.batch_size, num_workers=args.num_workers, shuffle = True)
+
+   ## Add GA dataset 
     
-    print(len(train_loader))
+    # fname='/Users/venkitesh_work/Documents/work/Sapient_AI/Data/Ousai_encoder_data/Saved_data/GA_dataset/npy_files_ML_input/ga_ml.npy'
+    fname='/Users/venkitesh_work/Documents/work/Sapient_AI/Data/Ousai_encoder_data/Saved_data/GA_dataset/npy_files_ML_input/normed_data/ga_normed_ml.npy'
+
+    arr=np.load(fname)
+    print(fname, arr.shape)
+    channels_idx=[0,1,2]
+    arr2=np.expand_dims(arr[:,channels_idx,:150],axis=2)
+    
+    # train_set    = [(i,i.shape[0]) for i in arr2[:600]]
+    # train_loader = data.DataLoader(train_set, batch_size=args.batch_size, num_workers=args.num_workers, shuffle = True)
+    # test_set    = [(i,i.shape[0]) for i in arr2[800:1200]]
+    # test_loader  = data.DataLoader(test_set, batch_size=args.batch_size, num_workers=args.num_workers, shuffle = True)
+
+    train_set    = [(i,i.shape[0]) for i in arr2[:600]]
+    train_loader = data.DataLoader(train_set, batch_size=args.batch_size, num_workers=args.num_workers, shuffle = True)
+    test_set    = [(i,i.shape[0]) for i in arr2[800:1200]]
+    test_loader  = data.DataLoader(test_set, batch_size=args.batch_size, num_workers=args.num_workers, shuffle = True)
+    # print(len(train_loader))
     
     if args.max_iter:
         args.max_epoch = np.ceil(args.max_iter * args.n_critic / len(train_loader))
 
-    args.max_epoch=2
+    ### Enforce max epoch value
+    args.max_epoch=5000
+    # args.print_freq=10
+
     # initial
     fixed_z = torch.FloatTensor(np.random.normal(0, 1, (100, args.latent_dim)))
     avg_gen_net = deepcopy(gen_net).cpu()
@@ -286,7 +309,7 @@ def main_worker(gpu, ngpus_per_node, args):
         if args.rank == 0 and args.show:
             backup_param = copy_params(gen_net)
             load_params(gen_net, gen_avg_param, args, mode="cpu")
-            save_samples(args, fixed_z, fid_stat, epoch, gen_net, writer_dict)
+            save_samples(args, fixed_z, epoch, gen_net, writer_dict)
             load_params(gen_net, backup_param, args)
             
         #fid_stat is not defined  It doesn't make sense to use image evaluate matrics
